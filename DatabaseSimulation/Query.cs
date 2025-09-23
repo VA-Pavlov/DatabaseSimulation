@@ -15,10 +15,23 @@ namespace DatabaseSimulation
         static string[] simbol = { ">", "<", "=", "!=", "<=", ">=", "LIKE" };
         public static void ExecuteQuery(Table table, string query)
         {
+            var rows = table.SqlTable;
+            bool flag = query.ToUpper().IndexOf("WHERE") != -1;
             switch (query.Split(' ')[0].ToUpper())
             {
                 case "SELECT":
-                    Console.WriteLine(table);
+                    if (flag)
+                    {
+                        foreach(var row in rows)
+                        {
+                            if (blockWhere(query, row))
+                            {
+                                Console.WriteLine(string.Join("\t|", row));
+                            }
+                        }
+                    }
+                    else
+                        Console.WriteLine(table);
                     break;
                 case "UPDATE":
 
@@ -33,7 +46,7 @@ namespace DatabaseSimulation
             }
         }
         //select * where 'id'>1 and 'age'>=30 or 'lastName' ilike '%п%'
-        public static void blockWhere(string query, Dictionary<string, Object> row)
+        public static bool blockWhere(string query, Dictionary<string, Object> row)
         {
             var i = query.ToUpper().IndexOf("WHERE");
             if (i != -1)
@@ -41,55 +54,45 @@ namespace DatabaseSimulation
                 var newLine = query.Substring(i + 5);//'id'>1 and ‘age’>=30 or ‘lastName’ ilike ‘%п%’
                 List<string> comandArray = newLine.Trim().Split(' ').ToList();//{'id'>1|and|‘age’>=30|or|‘lastName’ like ‘%п%’}->‘lastName’ilike‘%п%’!!!
                 connectLikes(comandArray);//'id'>1 | and | 'age'>=30 | or | 'lastName'like'%п%'
-                Console.WriteLine(string.Join(" | ", comandArray));
-                for(int j = 0;j<comandArray.Count;j++)
+                for (int j = 0; j < comandArray.Count; j++)
                 {
                     var elemrnt = comandArray[j];
-                    if(elemrnt.ToLower() != "and" && elemrnt.ToLower() != "or")
+                    if (elemrnt.ToLower() != "and" && elemrnt.ToLower() != "or")
                     {
-                        comandArray[j] = executeVirazenie(elemrnt,row) ? "1" : "0";
+                        comandArray[j] = executeVirazenie(elemrnt, row) ? "1" : "0";
                     }
                 }//0 | and | 1 | or | 0
-                Console.WriteLine(string.Join(" | ", comandArray));
                 while (comandArray.Contains("and") || comandArray.Contains("AND"))
                 {
-                    for(int index = 0; index < comandArray.Count; index++)
+                    for (int index = 0; index < comandArray.Count; index++)
                     {
                         if (comandArray[index].ToLower() == "and")
                         {
                             comandArray[index] = (int.Parse(comandArray[index - 1]) * int.Parse(comandArray[index + 1])).ToString();
-                            comandArray.Remove(comandArray[index +  1]);
+                            comandArray.Remove(comandArray[index + 1]);
                             comandArray.Remove(comandArray[index]);
                             index--;
                         }
                     }
                 }//0 | or | 0
-                Console.WriteLine(string.Join(" | ", comandArray));
                 while (comandArray.Contains("or") || comandArray.Contains("OR"))
                 {
                     for (int index = 0; index < comandArray.Count; index++)
                     {
                         if (comandArray[index].ToLower() == "or")
                         {
-                        Console.WriteLine("_________________");
                             var z = int.Parse(comandArray[index - 1]);
                             var t = int.Parse(comandArray[index + 1]);
-                        Console.WriteLine(string.Join(" | ", comandArray));
                             comandArray[index] = (z + t).ToString();
-                        Console.WriteLine(string.Join(" | ", comandArray));
-                            Console.WriteLine($"Я удалю: index: {index + 1} znachenie {comandArray[index + 1]} ");
                             comandArray.Remove(comandArray[index + 1]);
-                        Console.WriteLine(string.Join(" | ", comandArray));
-                            Console.WriteLine($"Я удалю: index: {index } znachenie {comandArray[index ]} ");
                             comandArray.Remove(comandArray[index]);
-                        Console.WriteLine(string.Join(" | ", comandArray));
                             index--;
                         }
-                        Console.WriteLine(string.Join(" | ", comandArray));
                     }
                 }
-                Console.WriteLine(string.Join(" | ", comandArray));
+                return comandArray[0]=="1";
             }
+            return false;
 
         }
 

@@ -7,13 +7,16 @@ namespace DatabaseSimulation
     {
         private List<Dictionary<string, Object>> table;
 
-        public List<Dictionary<string, Object>> GetTable()
+        public List<Dictionary<string, Object>> SqlTable
         {
-            if (table == null)
+            get
             {
-                table = new List<Dictionary<string, Object>>();
+                if (table == null)
+                {
+                    table = new List<Dictionary<string, Object>>();
+                }
+                return table;
             }
-            return table;
         }
 
         public static void FillTable(List<Dictionary<string, Object>> table)
