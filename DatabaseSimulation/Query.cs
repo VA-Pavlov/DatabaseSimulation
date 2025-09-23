@@ -26,7 +26,7 @@ namespace DatabaseSimulation
                         {
                             if (blockWhere(query, row))
                             {
-                                Console.WriteLine(string.Join("\t|", row));
+                                table.SqlTable.Remove() Console.WriteLine(string.Join("\t|", row));
                             }
                         }
                     }
@@ -37,6 +37,20 @@ namespace DatabaseSimulation
 
                     break;
                 case "DELETE":
+                    if (flag)
+                    {
+
+                        for (int i = 0; i < rows.Count; i++)
+                        {
+                            if (blockWhere(query, rows[i]))
+                            {
+                                table.SqlTable.Remove(rows[i]);
+                                i--;
+                            }
+                        }
+                    }
+                    else
+                        table.SqlTable.Clear();
                     break;
                 case "INSERT":
                     break;
